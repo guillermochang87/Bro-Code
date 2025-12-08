@@ -18,6 +18,14 @@ public class StackExample {
         System.out.println(stack);
         System.out.println("Is Stack empty?: " + stack.isEmpty());
 
+        stack.pop();
+        stack.pop();
+        stack.pop();
+
+        System.out.println(stack);
+
+        System.out.println("Is Stack empty?: " + stack.isEmpty());
+
     }
 
 }
