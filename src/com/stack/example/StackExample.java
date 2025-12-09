@@ -18,13 +18,18 @@ public class StackExample {
         System.out.println(stack);
         System.out.println("Is Stack empty?: " + stack.isEmpty());
 
-        stack.pop();
-        stack.pop();
-        stack.pop();
+        // stack.pop();
+        // stack.pop();
 
+        // Select without eliminate
+        String favoriteGame = stack.peek();
+
+        System.out.println(favoriteGame);
         System.out.println(stack);
 
-        System.out.println("Is Stack empty?: " + stack.isEmpty());
+        System.out.println("The position of the firts game is: " + stack.search("Borderlands"));
+
+        
 
     }
 
