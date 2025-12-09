@@ -1,4 +1,4 @@
-package com.dinamicarray.example;
+package com.dinamicarray;
 
 public class DynamicArray {
 

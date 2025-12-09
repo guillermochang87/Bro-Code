@@ -1,4 +1,4 @@
-package com.priorityqueue.example;
+package com.priorityqueue;
 
 import java.util.*;
 

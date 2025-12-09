@@ -1,4 +1,4 @@
-package com.linkedlistvsarraylist.example;
+package com.linkedlistvsarraylist;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

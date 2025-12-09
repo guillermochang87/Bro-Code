@@ -1,4 +1,4 @@
-package com.linearsearch.example;
+package com.linearsearch;
 
 public class Main {
 
