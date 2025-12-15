@@ -3,38 +3,57 @@ package com.simplecircuitbreaker;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
+
     public static void main(String[] args) throws InterruptedException {
-        // Setup: Trip if > 2 failures in 10 seconds. Cooldown is 3 seconds.
-        SimpleCircuitBreaker breaker = new SimpleCircuitBreaker(2, 10, TimeUnit.SECONDS, 3, TimeUnit.SECONDS);
+        // CONFIGURATION: 
+        // Opens after 3 consecutive failures.
+        // Waits 2 seconds (Cooldown) before trying again.
+        CircuitBreaker breaker = new CircuitBreaker(3, 2, TimeUnit.SECONDS);
 
-        // 1. Normal State
-        System.out.println("Request 1 Allowed? " + breaker.allowRequest()); // True
-        breaker.recordFailure(); // Failure 1
+        System.out.println("--- 1. START: EVERYTHING WORKING ---");
+        attemptRequest(breaker, false); // Success
+        attemptRequest(breaker, false); // Success
+        printState(breaker);
+
+        System.out.println("\n--- 2. SIMULATING FAILURES (Threshold is 3) ---");
+        attemptRequest(breaker, true); // Failure 1
+        attemptRequest(breaker, true); // Failure 2
+        attemptRequest(breaker, true); // Failure 3 -> CIRCUIT SHOULD OPEN HERE
         
-        System.out.println("Request 2 Allowed? " + breaker.allowRequest()); // True
-        breaker.recordFailure(); // Failure 2 (Still <= N)
+        printState(breaker); // Should be OPEN
+
+        System.out.println("\n--- 3. IMMEDIATE RETRY (Should be blocked locally) ---");
+        attemptRequest(breaker, false); // Even if the API is fine, the breaker blocks it
+
+        System.out.println("\n--- 4. WAITING FOR COOLDOWN (2.5 seconds) ---");
+        Thread.sleep(2500); 
+
+        System.out.println("\n--- 5. RECOVERY ATTEMPT (Half-Open) ---");
+        // Time has passed. This request is allowed through. If it succeeds, the breaker closes.
+        attemptRequest(breaker, false); 
         
-        System.out.println("Request 3 Allowed? " + breaker.allowRequest()); // True
-        breaker.recordFailure(); // Failure 3 (> N, Trips to OPEN)
+        printState(breaker); // Should be back to CLOSED
+    }
 
-        // 2. Open State (Blocking)
-        System.out.println("Request 4 (Immediate) Allowed? " + breaker.allowRequest()); // False
-
-        // 3. Wait for Cooldown
-        System.out.println("... Waiting for cooldown (3s) ...");
-        Thread.sleep(3500);
-
-        // 4. Half-Open State
-        // The next call checks time, sees cooldown passed, switches to HALF-OPEN
-        boolean testProbe = breaker.allowRequest();
-        System.out.println("Probe Request Allowed? " + testProbe); // True
-
-        // 5. Reset to Closed
-        if (testProbe) {
-            // Simulate success on the probe
-            breaker.recordSuccess(); 
+    // Helper method to execute requests
+    private static void attemptRequest(CircuitBreaker breaker, boolean forceFailure) {
+        try {
+            String response = breaker.execute(() -> callExternalApi(forceFailure));
+            System.out.println("✅ SUCCESS: " + response);
+        } catch (Exception e) {
+            System.err.println("❌ CONTROLLED ERROR: " + e.getMessage());
         }
+    }
 
-        System.out.println("Final State: " + breaker.getState()); // CLOSED
+    // Simulates an external service (Database, API, etc.)
+    private static String callExternalApi(boolean triggerFailure) {
+        if (triggerFailure) {
+            throw new RuntimeException("Simulated 500 Connection Error");
+        }
+        return "Data received successfully";
+    }
+
+    private static void printState(CircuitBreaker breaker) {
+        System.out.println("[CURRENT BREAKER STATE]: " + breaker.getState());
     }
 }
