@@ -1,7 +1,5 @@
 package com.tokenbucketratelimiter;
 
-import java.util.concurrent.TimeUnit;
-
 public class TokenBucketRateLimiter {
 
     private final long capacity;

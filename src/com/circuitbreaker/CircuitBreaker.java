@@ -17,7 +17,6 @@ public class CircuitBreaker {
     private final int failureThreshold;
     private final long windowSizeMs;
     private final long cooldownPeriodMs;
-    private volatile long lastFailureTime = 0;
     private volatile long openTime = 0;
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -62,8 +61,6 @@ public class CircuitBreaker {
         lock.lock();
         try {
             long currentTime = System.currentTimeMillis();
-            lastFailureTime = currentTime;
-            
             if (state.get() == State.HALF_OPEN) {
                 // If failure in HALF_OPEN, go back to OPEN
                 state.set(State.OPEN);
